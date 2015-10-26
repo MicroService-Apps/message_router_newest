@@ -106,8 +106,8 @@ function handleUpdate(req, res) {
             console.log("response", response);
 
             var status = response.status;
-            if(status == 'success') {
-                // try to update student if student reply success
+            if(status == 'succeed') {
+                // try to update student if student reply succeed
                 updateStudent(body);
             } else {
                 res.send(response);
@@ -119,7 +119,7 @@ function handleUpdate(req, res) {
     function updateStudent(body) {
         var message = {
             'method': 'update',
-            'uid': body.student,
+            'uni': body.student,
             'name': '',
             'courseAction': body.studentAction,
             'course': body.cid
@@ -195,7 +195,7 @@ function handleDelete(req, res) {
             console.log("response", response);
 
             var status = response.status;
-            if(status == 'success') {
+            if(status == 'succeed') {
                 // delete course in student service
                 deleteCourseInStudent(body);
             } else {
@@ -209,7 +209,7 @@ function handleDelete(req, res) {
     function deleteCourseInStudent(body) {
         var message = {
             'method': 'update',
-            'uid': '#',
+            'uni': '#',
             'name': '',
             'courseAction': 'delete',
             'course': body.cid

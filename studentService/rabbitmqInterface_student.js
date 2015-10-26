@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var amqp = require('amqplib');
+var studentHandler = require('./studentHandler')
 
 var CONTENT_TYPE='application/json';
 var serviceType = 'student';
@@ -19,18 +20,13 @@ amqp.connect('amqp://localhost').then(function(conn) {
         });
 
         function reply(msg) {
-            console.log(msg.content.toString());
-            sendBack(msg, ch);
+            studentHandler.handleMsg(msg,ch,sendBack);
         }
     });
 }).then(null, console.warn);
 
-function sendBack(msg, ch) {
-    var response = {
-        'status': 'success',
-        'message': serviceType
-    };
 
+function sendBack(msg, ch, response) {
     ch.sendToQueue(msg.properties.replyTo,
         new Buffer(JSON.stringify(response)),
         {correlationId: msg.properties.correlationId,

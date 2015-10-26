@@ -35,8 +35,6 @@ exports.execute = function(req, res) {
 
             break;
     }
-
-
 }
 
 // handle create method
@@ -105,13 +103,16 @@ function handleUpdate(req, res) {
         else {
             console.log("response", response);
 
-            var status = response.status;
-            if(status == 'success') {
-                // try to update course if student reply success
-                updateCourse(body);
-            } else {
-                res.send(response);
-            }
+            //var status = response.status;
+            //var courseAction = response.courseAction;
+            //if(status == 'succeed' && courseAction != '') {
+            //    // try to update course if student reply succeed
+            //    updateCourse(body);
+            //} else {
+            //    res.send(response);
+            //}
+
+            res.send(response);
         }
     });
 
@@ -195,13 +196,15 @@ function handleDelete(req, res) {
         else {
             console.log("response", response);
 
-            var status = response.status;
-            if(status == 'success') {
-                // delete student in course service
-                deleteStudentInCourse(body);
-            } else {
-                res.send(response);
-            }
+            //var status = response.status;
+            //if(status == 'succeed') {
+            //    // delete student in course service
+            //    deleteStudentInCourse(body);
+            //} else {
+            //    res.send(response);
+            //}
+
+            res.send(response);
         }
     });
 
