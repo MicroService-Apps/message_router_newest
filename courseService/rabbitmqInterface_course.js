@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var amqp = require('amqplib');
+var courseHandler = require('./courseHandler')
 
 var CONTENT_TYPE='application/json';
 var serviceType = 'course';
@@ -9,7 +10,7 @@ var serviceType = 'course';
 amqp.connect('amqp://localhost').then(function(conn) {
     process.once('SIGINT', function() { conn.close(); });
     return conn.createChannel().then(function(ch) {
-        var ok = ch.assertQueue(serviceType, {durable: false});
+        var ok = ch.assertQueue(serviceType, {durable: true});
         var ok = ok.then(function() {
             ch.prefetch(1);
             return ch.consume(serviceType, reply);
@@ -19,18 +20,13 @@ amqp.connect('amqp://localhost').then(function(conn) {
         });
 
         function reply(msg) {
-            console.log(msg.content.toString());
-            sendBack(msg, ch);
+            courseHandler.handleMsg(msg,ch,sendBack);
         }
     });
 }).then(null, console.warn);
 
-function sendBack(msg, ch) {
-    var response = {
-        'status': 'success',
-        'message': serviceType
-    };
 
+function sendBack(msg, ch, response) {
     ch.sendToQueue(msg.properties.replyTo,
         new Buffer(JSON.stringify(response)),
         {correlationId: msg.properties.correlationId,

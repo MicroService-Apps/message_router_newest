@@ -54,10 +54,6 @@ exports.handleMsg = function (message, ch, Callback){
                             response.message = "No student take course "+msg["course"];
                             Callback(message,ch,response);
                         }
-
-
-
-
                     });
 
                 }
@@ -78,30 +74,41 @@ exports.handleMsg = function (message, ch, Callback){
             if(msg["uni"]) query.Uni = msg["uni"];
             if(msg["course"]) query.CourseEnrolled = msg["course"];
 
-            student.count({Uni: msg["uni"]}, function(err, count) {
-                if(count>0){
-                    student.find(query).toArray(function(err, result) {
-                        if (err) {
-                            response.status = "failed";
-                            response.message = err.toSring();
-                            Callback(message,ch,response);
-                        }
-                        else{
-                            response.status = "succeed";
-                            response.message = count+" Student found";
-                            response.body = result;
-                            logmsg(JSON.stringify(msg)+"\n");
-                            Callback(message,ch,response);
-                        }
-                    });
-                }
-                else{
-                    response.status = "failed";
-                    response.message = "no student match your request";
-                    logmsg(JSON.stringify(msg)+"\n");
-                    Callback(message,ch,response);
-                }
-            });
+            if(msg["uni"] == "#") {
+                student.find({}, {Uni: true}).toArray(function(err, results) {
+                    response.status = "succeed";
+                    response.message = "list all students uni";
+                    response.body = results;
+
+                    logmsg(JSON.stringify(msg) + "\n");
+                    Callback(message, ch, response);
+                });
+            } else {
+                student.count({Uni: msg["uni"]}, function (err, count) {
+                    if (count > 0) {
+                        student.find(query).toArray(function (err, result) {
+                            if (err) {
+                                response.status = "failed";
+                                response.message = err.toSring();
+                                Callback(message, ch, response);
+                            }
+                            else {
+                                response.status = "succeed";
+                                response.message = count + " Student found";
+                                response.body = result;
+                                logmsg(JSON.stringify(msg) + "\n");
+                                Callback(message, ch, response);
+                            }
+                        });
+                    }
+                    else {
+                        response.status = "failed";
+                        response.message = "no student match your request";
+                        logmsg(JSON.stringify(msg) + "\n");
+                        Callback(message, ch, response);
+                    }
+                });
+            }
             break;
 
         case 'delete':
@@ -216,7 +223,10 @@ function handleUpdate(msg,message,ch,student,Callback){
             response.status = "failed";
             response.message = err.toSring();
             Callback(message,ch,response);
+
+            return;
         }
+
         if(result)
         {
             if(msg["name"]){
@@ -235,9 +245,7 @@ function handleUpdate(msg,message,ch,student,Callback){
                     }
 
                 });
-            }
-
-            if(msg["course"]){
+            } else if(msg["course"]){
                 if(msg["courseAction"]=="Add"){
                     var course = result.CourseEnrolled;
                     if(course.indexOf(msg["course"])==-1){
@@ -261,7 +269,6 @@ function handleUpdate(msg,message,ch,student,Callback){
                         response.message = "course already enrolled by Student(Uni:"+msg["uni"]+").";
                         Callback(message,ch,response);
                     }
-
                 }
                 else if(msg["courseAction"]=="Del"){
                     var course = result.CourseEnrolled;
@@ -294,7 +301,6 @@ function handleUpdate(msg,message,ch,student,Callback){
                     Callback(message,ch,response);
                 }
             }
-
         }
         else{
             response.status = "failed";
@@ -303,7 +309,6 @@ function handleUpdate(msg,message,ch,student,Callback){
         }
 
     });
-
 }
 
 function handleDelete(msg,message,ch,student,Callback){
@@ -336,7 +341,6 @@ function handleDelete(msg,message,ch,student,Callback){
         }
     });
 }
-
 
 function logmsg(string){
     var logpath = path.join(path.dirname(__dirname),'log/student.log');

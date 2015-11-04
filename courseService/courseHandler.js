@@ -54,20 +54,14 @@ exports.handleMsg = function (message, ch, Callback){
                             response.message = "No course is enrolled by student "+msg["student"];
                             Callback(message,ch,response);
                         }
-
-
-
-
                     });
-
                 }
                 else{
                     response.status = "failed";
                     response.message = "No such Student Action";
                     Callback(message,ch,response);
                 }
-            }
-            else{
+            } else{
                 handleUpdate(msg,message,ch,course,Callback);
             }
             break;
@@ -79,30 +73,42 @@ exports.handleMsg = function (message, ch, Callback){
             if(msg["instructor"]) query.Instructor = msg["instructor"];
             if(msg["student"]) query.StudentsEnrolled = msg["student"];
 
-            course.count({Cid: msg["cid"]}, function(err, count) {
-                if(count>0){
-                    course.find(query).toArray(function(err, result) {
-                        if (err) {
-                            response.status = "failed";
-                            response.message = err.toSring();
-                            Callback(message,ch,response);
-                        }
-                        else{
-                            response.status = "succeed";
-                            response.message = count+" Course found";
-                            response.body = result;
-                            logmsg(JSON.stringify(msg)+"\n");
-                            Callback(message,ch,response);
-                        }
-                    });
-                }
-                else{
-                    response.status = "failed";
-                    response.message = "no course match your request";
-                    logmsg(JSON.stringify(msg)+"\n");
-                    Callback(message,ch,response);
-                }
-            });
+            if(msg["cid"] == "#") {
+                course.find({}, {Cid: true}).toArray(function(err, results) {
+                    response.status = "succeed";
+                    response.message = "list all courses cid";
+                    response.body = results;
+
+                    logmsg(JSON.stringify(msg) + "\n");
+                    Callback(message, ch, response);
+                });
+            } else {
+                course.count({Cid: msg["cid"]}, function (err, count) {
+                    if (count > 0) {
+                        course.find(query).toArray(function (err, result) {
+                            if (err) {
+                                response.status = "failed";
+                                response.message = err.toSring();
+                                Callback(message, ch, response);
+                            }
+                            else {
+                                response.status = "succeed";
+                                response.message = count + " Course found";
+                                response.body = result;
+                                logmsg(JSON.stringify(msg) + "\n");
+                                Callback(message, ch, response);
+                            }
+                        });
+                    }
+                    else {
+                        response.status = "failed";
+                        response.message = "no course match your request";
+                        logmsg(JSON.stringify(msg) + "\n");
+                        Callback(message, ch, response);
+                    }
+                });
+            }
+
             break;
 
         case 'delete':
@@ -236,9 +242,22 @@ function handleUpdate(msg,message,ch,course,Callback){
                     }
 
                 });
-            }
-
-            if(msg["student"]){
+            } else if(msg["instructor"]){
+                course.update({Cid: msg["cid"]},{'$set':{Instructor: msg["instructor"]}},function(err,res){
+                    if(err){
+                        response.status = "failed";
+                        response.message = err.toSring();
+                        Callback(message,ch,response);
+                    }
+                    else {
+                        response.status = "succeed";
+                        response.message = "course "+msg["cid"]+"'s instructor has been chanded to "+msg["instructor"];
+                        msg["oldinstructor"] = result["instructor"];
+                        logmsg(JSON.stringify(msg)+"\n");
+                        Callback(message,ch,response);
+                    }
+                });
+            } else if(msg["student"]){
                 if(msg["studentAction"]=="Add"){
                     var student = result.StudentsEnrolled;
                     if(student.indexOf(msg["student"])==-1){

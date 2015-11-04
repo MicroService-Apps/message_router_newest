@@ -10,7 +10,7 @@ var serviceType = 'student';
 amqp.connect('amqp://localhost').then(function(conn) {
     process.once('SIGINT', function() { conn.close(); });
     return conn.createChannel().then(function(ch) {
-        var ok = ch.assertQueue(serviceType, {durable: false});
+        var ok = ch.assertQueue(serviceType, {durable: true});
         var ok = ok.then(function() {
             ch.prefetch(1);
             return ch.consume(serviceType, reply);
