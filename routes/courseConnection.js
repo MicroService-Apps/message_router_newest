@@ -107,15 +107,13 @@ function handleUpdate(req, res) {
         else {
             console.log("response", response);
 
-            //var status = response.status;
-            //if(status == 'succeed') {
-            //    // try to update student if student reply succeed
-            //    updateStudent(body);
-            //} else {
-            //    res.send(response);
-            //}
-
-            res.send(response);
+            var status = response.status;
+            if(status == 'succeed') {
+                // try to update student if student reply succeed
+                updateStudent(body);
+            } else {
+                res.send(response);
+            }
         }
     });
 
@@ -125,6 +123,7 @@ function handleUpdate(req, res) {
             'method': 'update',
             'uni': body.student,
             'name': '',
+            'instructor': '',
             'courseAction': body.studentAction,
             'course': body.cid
         };
@@ -145,7 +144,7 @@ function handleUpdate(req, res) {
             }
             else {
                 var status = response.status;
-                if(status == 'error') {
+                if(status == 'failed') {
                     // revert action in student when error occurs
                     revertCourse();
                 }
@@ -198,15 +197,13 @@ function handleDelete(req, res) {
         else {
             console.log("response", response);
 
-            //var status = response.status;
-            //if(status == 'succeed') {
-            //    // delete course in student service
-            //    deleteCourseInStudent(body);
-            //} else {
-            //    res.send(response);
-            //}
-
-            res.send(response);
+            var status = response.status;
+            if(status == 'succeed') {
+                // delete course in student service
+                deleteCourseInStudent(body);
+            } else {
+                res.send(response);
+            }
         }
     });
 
@@ -217,8 +214,8 @@ function handleDelete(req, res) {
             'method': 'update',
             'uni': '#',
             'name': '',
-            'courseAction': 'delete',
-            'course': body.cid
+            'courseAction': 'Del',
+            'course': body.cid,
         };
 
         rpcLib.sendTo(rpc, studentService, message, function response(err, response){
@@ -230,37 +227,12 @@ function handleDelete(req, res) {
                 else
                     console.error(error);
 
-                // revert action in course when error occurs
-                revertDeleteInCourse();
                 // send back error info
                 res.send('error occurred when deleting student service');
             }
             else {
                 console.log("response", response);
                 res.send(response);
-            }
-        });
-    }
-
-    // revert delete action in student service
-    function revertDeleteInCourse() {
-        var revertMessage = {
-            'method': 'revert'
-        };
-
-        rpcLib.sendTo(rpc, courseService, revertMessage, function response(err, response){
-            if(err) {
-                if(err.code == 'ECONNRESET') {
-                    //handle the reponse timeout
-                    console.error('response timeout');
-                }
-                else
-                    console.error(err);
-
-                res.send('error occurred when revert course service');
-            }
-            else {
-                console.log("response", response);
             }
         });
     }

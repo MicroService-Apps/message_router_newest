@@ -34,14 +34,14 @@ exports.handleMsg = function (message, ch, Callback){
                             var count = 0;
                             result.forEach(function(resultCourse){
                                 var student = resultCourse.StudentsEnrolled;
-                                student.splice(course.indexOf(msg["student"]),1);
+                                student.splice(student.indexOf(msg["student"]),1);
                                 course.update({Cid: resultCourse["Cid"]},{'$set':{StudentsEnrolled: student}},function(err,res){
                                     if(!err) {
                                         str = str+" "+resultCourse["Cid"];
                                         count++;
                                         if(count == result.length){
                                             response.status = "succeed";
-                                            response.message = "Student "+msg["student"]+" is deleted from Course(Uni:"+str+").";
+                                            response.message = "Student "+msg["student"]+" is deleted and deleted from all Courses.";
                                             logmsg(JSON.stringify(msg)+"\n");
                                             Callback(message,ch,response);
                                         }
