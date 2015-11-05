@@ -134,9 +134,11 @@ exports.handleMsg = function (message, ch, Callback){
                         case 'update':
                             if(command["name"]){
                                 command["name"]=command["oldname"];
-                                handleUpdate(command,message,ch,course,Callback)
-                            }
-                            if(command["student"]){
+                                handleUpdate(command,message,ch,course,Callback);
+                            } else if(command['instructor']) {
+                                command["instructor"]=command["oldinstructor"];
+                                handleUpdate(command,message,ch,course,Callback);
+                            } else if(command["student"]){
                                 if(command["studentAction"]=="Add"){
                                     command["studentAction"]="Del";
                                     handleUpdate(command,message,ch,course,Callback);
@@ -148,13 +150,10 @@ exports.handleMsg = function (message, ch, Callback){
                             }
                             break;
 
-
                         default :
+                            handleDefaultRevert(message, ch, Callback);
                             break;
-
                     }
-
-
                 }
 
                 //if (/* done */) {
@@ -176,16 +175,8 @@ exports.handleMsg = function (message, ch, Callback){
         Callback(message,ch,response);
     }
 
-
     //return response;
-
-
 };
-
-
-
-
-
 
 function handleCreate(msg,message,ch,course,Callback){
     var response = new Object();
@@ -235,7 +226,7 @@ function handleUpdate(msg,message,ch,course,Callback){
                     }
                     else {
                         response.status = "succeed";
-                        response.message = "course "+msg["cid"]+"'s name has been chanded to "+msg["name"];
+                        response.message = "course "+msg["cid"]+"'s name has been changed to "+msg["name"];
                         msg["oldname"] = result["Name"];
                         logmsg(JSON.stringify(msg)+"\n");
                         Callback(message,ch,response);
@@ -251,8 +242,8 @@ function handleUpdate(msg,message,ch,course,Callback){
                     }
                     else {
                         response.status = "succeed";
-                        response.message = "course "+msg["cid"]+"'s instructor has been chanded to "+msg["instructor"];
-                        msg["oldinstructor"] = result["instructor"];
+                        response.message = "course "+msg["cid"]+"'s instructor has been changed to "+msg["instructor"];
+                        msg["oldinstructor"] = result["Instructor"];
                         logmsg(JSON.stringify(msg)+"\n");
                         Callback(message,ch,response);
                     }
@@ -286,7 +277,7 @@ function handleUpdate(msg,message,ch,course,Callback){
                 else if(msg["studentAction"]=="Del"){
                     var student = result.StudentsEnrolled;
                     if(student.indexOf(msg["student"])!=-1){
-                        course.splice(course.indexOf(msg["student"]),1);
+                        student.splice(student.indexOf(msg["student"]),1);
                         course.update({Cid: msg["cid"]},{'$set':{StudentsEnrolled: student}},function(err,result){
                             if(err) {
                                 response.status = "failed";
@@ -368,6 +359,14 @@ function logmsg(string){
 
 }
 
+// handle the default revert if can't find revert
+function handleDefaultRevert(message,ch, Callback) {
+    var response = new Object();
+    response.status = "failed";
+    response.message = "can't revert the last operation";
+
+    Callback(message,ch,response);
+}
 
 
 

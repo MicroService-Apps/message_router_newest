@@ -30,6 +30,10 @@ exports.execute = function(req, res) {
             handleConfig(req, res);
 
             break;
+        case 'revert':
+            handleConfig(req, res);
+
+            break;
         default:
             res.send('No such method');
 

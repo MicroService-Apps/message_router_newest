@@ -148,13 +148,10 @@ exports.handleMsg = function (message, ch, Callback){
                             }
                             break;
 
-
                         default :
+                            handleDefaultRevert(message, ch, Callback);
                             break;
-
                     }
-
-
                 }
 
                 //if (/* done */) {
@@ -181,11 +178,6 @@ exports.handleMsg = function (message, ch, Callback){
 
 
 };
-
-
-
-
-
 
 function handleCreate(msg,message,ch,student,Callback){
     var response = new Object();
@@ -269,8 +261,7 @@ function handleUpdate(msg,message,ch,student,Callback){
                         response.message = "course already enrolled by Student(Uni:"+msg["uni"]+").";
                         Callback(message,ch,response);
                     }
-                }
-                else if(msg["courseAction"]=="Del"){
+                } else if(msg["courseAction"]=="Del"){
                     var course = result.CourseEnrolled;
                     if(course.indexOf(msg["course"])!=-1){
                         course.splice(course.indexOf(msg["course"]),1);
@@ -349,6 +340,15 @@ function logmsg(string){
         if (err) throw err;
     });
 
+}
+
+// handle the default revert if can't find revert
+function handleDefaultRevert(message,ch, Callback) {
+    var response = new Object();
+    response.status = "failed";
+    response.message = "can't revert the last operation";
+
+    Callback(message,ch,response);
 }
 
 
